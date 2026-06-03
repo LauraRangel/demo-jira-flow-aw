@@ -1,0 +1,10 @@
+# Owners de este repositorio
+# Toda modificacion requiere revision del owner principal
+
+* @LauraRangel
+
+# Workflow principal y lock file
+.github/workflows/ @LauraRangel
+
+# Definiciones de agentes
+.github/agents/ @LauraRangel

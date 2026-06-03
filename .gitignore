@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Env files - nunca commitear secrets
+.env
+.env.local
+*.env
+
+# Node (si se usa localmente para pruebas)
+node_modules/
+
+# Contexto de IA - archivos locales de asistentes
+CLAUDE.md
+.claude/
+.cursor/
+.copilot/
+.aider*
+.continue/
+.codeium/
+*.cursorrules
+.windsurfrules
