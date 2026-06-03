@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"9deffc268cbd2c6f94b02b6ef9de9c2e1c9c17919e4a5e25835ba74bf70be18d","body_hash":"39ef6e7bb741c0518d3e811347b95950471b2b9ea360da3b5b5ab6cd2a0acfd5","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"gpt-4o"}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"94395f82ca3ba233eb07e2fe0a7b1c0a1150d992dbedffd85744dbdfdec1032e","body_hash":"ce02cb18bbd3f9e8596f85499e5390326f7b03e36fd73bbfe15d7003ec3936c6","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"gpt-4o"}
 # gh-aw-manifest: {"version":1,"secrets":["ATLASSIAN_BASIC_AUTH","COPILOT_GITHUB_TOKEN","GH_AW_AGENT_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","TARGET_REPO_PAT"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"3ea13c02d765410340d533515cb31a7eef2baaf0","version":"v0.77.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.58"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.22"},{"image":"ghcr.io/github/github-mcp-server:v1.1.0"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -22,6 +22,9 @@
 #
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
+#
+# Frontmatter env variables:
+#   - JIRA_BASE_URL: (main workflow)
 #
 # Secrets used:
 #   - ATLASSIAN_BASIC_AUTH
@@ -63,10 +66,6 @@ on:
         description: "Agent caller context (used internally by Agentic Workflows)."
         required: false
         type: string
-      jira_base_url:
-        default: https://team-agentic-wf.atlassian.net
-        description: "URL base de Jira (ejemplo: https://miempresa.atlassian.net)"
-        required: false
       ticket_id:
         description: "ID del ticket de Jira (ejemplo: DEMO-1)"
         required: true
@@ -77,6 +76,9 @@ concurrency:
   group: "gh-aw-${{ github.workflow }}"
 
 run-name: "Orquestador Jira a PR"
+
+env:
+  JIRA_BASE_URL: ${{ vars.ATLASSIAN_SITE_URL }}
 
 jobs:
   activation:
@@ -191,6 +193,7 @@ jobs:
         env:
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_SAFE_OUTPUTS: ${{ runner.temp }}/gh-aw/safeoutputs/outputs.jsonl
+          GH_AW_ENV_JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
           GH_AW_EXPR_1A3A194A: ${{ github.event.discussion.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'discussion' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
           GH_AW_EXPR_463A214A: ${{ github.event.pull_request.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'pull_request' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
           GH_AW_EXPR_802A9F6A: ${{ github.event.issue.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'issue' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
@@ -200,28 +203,27 @@ jobs:
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
-          GH_AW_STEPS_ATLASSIAN_OUTPUTS_JIRA_URL: ${{ steps.atlassian.outputs.jira_url }}
         # poutine:ignore untrusted_checkout_exec
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_0d15185d21b398b4_EOF'
+          cat << 'GH_AW_PROMPT_a68eee179b071556_EOF'
           <system>
-          GH_AW_PROMPT_0d15185d21b398b4_EOF
+          GH_AW_PROMPT_a68eee179b071556_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_0d15185d21b398b4_EOF'
+          cat << 'GH_AW_PROMPT_a68eee179b071556_EOF'
           <safe-output-tools>
           Tools: create_pull_request, assign_to_agent, missing_tool, missing_data, noop
-          GH_AW_PROMPT_0d15185d21b398b4_EOF
+          GH_AW_PROMPT_a68eee179b071556_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_create_pull_request.md"
-          cat << 'GH_AW_PROMPT_0d15185d21b398b4_EOF'
+          cat << 'GH_AW_PROMPT_a68eee179b071556_EOF'
           </safe-output-tools>
-          GH_AW_PROMPT_0d15185d21b398b4_EOF
+          GH_AW_PROMPT_a68eee179b071556_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
-          cat << 'GH_AW_PROMPT_0d15185d21b398b4_EOF'
+          cat << 'GH_AW_PROMPT_a68eee179b071556_EOF'
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if github.actor}}
@@ -250,21 +252,21 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_0d15185d21b398b4_EOF
+          GH_AW_PROMPT_a68eee179b071556_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/cli_proxy_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_0d15185d21b398b4_EOF'
+          cat << 'GH_AW_PROMPT_a68eee179b071556_EOF'
           </system>
           {{#runtime-import .github/workflows/jira-orchestrator.md}}
-          GH_AW_PROMPT_0d15185d21b398b4_EOF
+          GH_AW_PROMPT_a68eee179b071556_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_ENGINE_ID: "copilot"
+          GH_AW_ENV_JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
           GH_AW_GITHUB_EVENT_INPUTS_TICKET_ID: ${{ github.event.inputs.ticket_id }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
-          GH_AW_STEPS_ATLASSIAN_OUTPUTS_JIRA_URL: ${{ steps.atlassian.outputs.jira_url }}
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -275,6 +277,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
+          GH_AW_ENV_JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
           GH_AW_EXPR_1A3A194A: ${{ github.event.discussion.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'discussion' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
           GH_AW_EXPR_463A214A: ${{ github.event.pull_request.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'pull_request' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
           GH_AW_EXPR_802A9F6A: ${{ github.event.issue.number || (fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_type == 'issue' && fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').item_number) }}
@@ -286,7 +289,6 @@ jobs:
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
           GH_AW_MCP_CLI_SERVERS_LIST: "- `jira` — run `jira --help` to see available tools\n- `safeoutputs` — run `safeoutputs --help` to see available tools"
           GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: ${{ needs.pre_activation.outputs.activated }}
-          GH_AW_STEPS_ATLASSIAN_OUTPUTS_JIRA_URL: ${{ steps.atlassian.outputs.jira_url }}
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -298,6 +300,7 @@ jobs:
             return await substitutePlaceholders({
               file: process.env.GH_AW_PROMPT,
               substitutions: {
+                GH_AW_ENV_JIRA_BASE_URL: process.env.GH_AW_ENV_JIRA_BASE_URL,
                 GH_AW_EXPR_1A3A194A: process.env.GH_AW_EXPR_1A3A194A,
                 GH_AW_EXPR_463A214A: process.env.GH_AW_EXPR_463A214A,
                 GH_AW_EXPR_802A9F6A: process.env.GH_AW_EXPR_802A9F6A,
@@ -308,8 +311,7 @@ jobs:
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
                 GH_AW_MCP_CLI_SERVERS_LIST: process.env.GH_AW_MCP_CLI_SERVERS_LIST,
-                GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED,
-                GH_AW_STEPS_ATLASSIAN_OUTPUTS_JIRA_URL: process.env.GH_AW_STEPS_ATLASSIAN_OUTPUTS_JIRA_URL
+                GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED
               }
             });
       - name: Validate prompt placeholders
@@ -407,16 +409,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Copy event payload to sandbox-accessible location
-        run: |
+        run: |-
           if [ ! -f "$GITHUB_EVENT_PATH" ]; then
             echo "::error::Event file not found at $GITHUB_EVENT_PATH"
             exit 1
           fi
           cp "$GITHUB_EVENT_PATH" /tmp/gh-aw/event.json
-      - id: atlassian
-        run: |-
-          JIRA_URL=$(cat /tmp/gh-aw/event.json | jq -r '.client_payload["jira_base_url"] // .inputs.jira_base_url // empty')
-          echo "jira_url=$JIRA_URL" >> $GITHUB_OUTPUT
 
       - name: Configure Git credentials
         env:
@@ -490,9 +488,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << GH_AW_SAFE_OUTPUTS_CONFIG_8d6e7101817ba4e3_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << GH_AW_SAFE_OUTPUTS_CONFIG_435b9a8e4e42ad97_EOF
           {"assign_to_agent":{"max":1,"name":"copilot","target":"*"},"create_pull_request":{"allowed_repos":["LauraRangel/agentic-workflows-presentation-gcd26"],"draft":true,"github-token":"${TARGET_REPO_PAT}","max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"request_review"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_8d6e7101817ba4e3_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_435b9a8e4e42ad97_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -736,7 +734,7 @@ jobs:
           
           mkdir -p /home/runner/.copilot
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_05c1f63b2b3b9f75_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_5a86e01caaab70de_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "jira": {
@@ -781,7 +779,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_05c1f63b2b3b9f75_EOF
+          GH_AW_MCP_CONFIG_5a86e01caaab70de_EOF
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true

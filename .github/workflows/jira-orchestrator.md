@@ -7,15 +7,13 @@ on:
       ticket_id:
         description: 'ID del ticket de Jira (ejemplo: DEMO-1)'
         required: true
-      jira_base_url:
-        description: 'URL base de Jira (ejemplo: https://miempresa.atlassian.net)'
-        required: false
-        default: 'https://team-agentic-wf.atlassian.net'
-
 engine:
   id: copilot
   model: gpt-4o
 timeout-minutes: 15
+
+env:
+  JIRA_BASE_URL: "${{ vars.ATLASSIAN_SITE_URL }}"
 
 permissions:
   contents: read
@@ -51,10 +49,6 @@ steps:
         exit 1
       fi
       cp "$GITHUB_EVENT_PATH" /tmp/gh-aw/event.json
-  - id: atlassian
-    run: |
-      JIRA_URL=$(cat /tmp/gh-aw/event.json | jq -r '.client_payload["jira_base_url"] // .inputs.jira_base_url // empty')
-      echo "jira_url=$JIRA_URL" >> $GITHUB_OUTPUT
 
 safe-outputs:
   create-pull-request:
@@ -82,7 +76,7 @@ cat /tmp/gh-aw/event.json | jq -r '.client_payload["ticket_id"] // .inputs.ticke
 Con ese ID, usa las dos herramientas del MCP en secuencia para leer el contenido completo:
 
 1. Llama a `getTeamworkGraphContext` con estos tres argumentos exactos:
-   - `cloudId`: `${{ steps.atlassian.outputs.jira_url }}`
+   - `cloudId`: `${{ env.JIRA_BASE_URL }}`
    - `objectType`: `JiraWorkItem`
    - `objectIdentifier`: el ID del ticket (ej. `SCRUM-5`)
 
