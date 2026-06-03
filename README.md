@@ -1,6 +1,6 @@
 # Jira to PR - GitHub Agentic Workflow
 
-Convierte un ticket de Jira en un Pull Request automaticamente usando GitHub Agentic Workflows con un patron de orquestacion multi-agente.
+Convierte un ticket de Jira en un Pull Request automaticamente usando GitHub Agentic Workflows con un patron de orquestacion multi-agente de 4 fases.
 
 ## Como funciona
 
@@ -10,24 +10,24 @@ Jira issue creado
       v
 repository_dispatch --> jira-orchestrator
                               |
-                        Paso 0: Lee el ticket via MCP de Atlassian
+                        Paso 0: Lee ticket via MCP de Atlassian + lee archivos del repo
                               |
-                        Paso 1: Diseno  (historias de usuario y requisitos)
+                        Paso 1: Diseno  (objetivo, historias de usuario, requisitos)
                               |
-                        Paso 2: Arquitectura  (pila tecnologica y estructura)
+                        Paso 2: Arquitectura  (decision tecnica, archivos a modificar)
                               |
-                        Paso 3: Desarrollo  (clona repo destino, escribe codigo)
+                        Paso 3: Desarrollo  (crea rama, edita codigo en docs/)
                               |
-                        Paso 4: Calidad  (revision con ciclo de correccion, max 3 iter)
+                        Paso 4: Calidad  (verifica requisitos, max 3 iteraciones)
                               |
                         Paso 5: Pull Request en draft + asigna Copilot
 ```
 
-## Requisitos
+## Requisitos previos
 
 - `gh` CLI con extension `gh aw` v0.77.5+
 - Cuenta de GitHub con GitHub Copilot
-- Cuenta de Jira Cloud (free o superior) con acceso de admin a la org de Atlassian
+- Cuenta de Jira Cloud con acceso de admin a la org de Atlassian
 
 ## Fork y configuracion
 
@@ -36,67 +36,61 @@ repository_dispatch --> jira-orchestrator
 ```bash
 git clone https://github.com/<tu-usuario>/demo-jira-flow-aw
 cd demo-jira-flow-aw
-```
-
-### 2. Ajustar el repo destino del codigo
-
-En `.github/workflows/jira-orchestrator.md` cambia el valor por defecto del repo donde se crearan las ramas y PRs:
-
-```yaml
-# safe-outputs
-allowed-repos:
-  - <tu-usuario>/<tu-repo-destino>
-```
-
-Recompila despues de cualquier cambio al `.md`:
-
-```bash
 gh aw compile --approve
 ```
 
-### 3. Configurar secretos en GitHub
+### 2. Configurar GitHub Actions
 
-En el repo > **Settings > Secrets and variables > Actions**, agrega:
+Repo > **Settings > Actions > General > Workflow permissions** > activar **"Allow GitHub Actions to create and approve pull requests"**.
 
-| Secreto | Como obtenerlo |
-|---|---|
-| `COPILOT_GITHUB_TOKEN` | Token con permiso Copilot Requests en tu org de GitHub |
-| `ATLASSIAN_BASIC_AUTH` | `echo -n "tu@email.com:TU_API_TOKEN_ATLASSIAN" \| base64` |
-| `TARGET_REPO_PAT` | PAT clasico con scope `repo` con acceso al repo destino |
+### 3. Configurar secretos
+
+Repo > **Settings > Secrets and variables > Actions**:
+
+| Tipo | Nombre | Valor |
+|---|---|---|
+| Secret | `COPILOT_GITHUB_TOKEN` | Token con permiso Copilot Requests |
+| Secret | `ATLASSIAN_BASIC_AUTH` | `echo -n "tu@email.com:API_TOKEN" \| base64` |
+| Variable | `ATLASSIAN_SITE_URL` | URL completa de Jira: `https://tu-sitio.atlassian.net` |
 
 Para el token de Atlassian: [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
 
-### 4. Habilitar autenticacion por API token en Atlassian
+### 4. Habilitar API token en Atlassian
 
-Atlassian admin > **Security > Rovo MCP Server** > activar **Allow authentication via API tokens**.
+Atlassian admin > **Security > Rovo MCP Server** > activar **"Allow authentication via API tokens"**.
 
-Sin esto el MCP rechaza la conexion.
+### 5. Configurar automatizacion en Jira
 
-### 5. Crear la automatizacion en Jira
-
-En tu proyecto Jira > **Project settings > Automation > Create rule**:
+Proyecto Jira > **Project settings > Automation > Create rule**:
 
 - **Trigger:** `Issue created`
 - **Action:** `Send web request`
   - **URL:** `https://api.github.com/repos/<tu-usuario>/demo-jira-flow-aw/dispatches`
   - **Method:** `POST`
-  - **Headers:**
-    - `Authorization: Bearer <tu-PAT-de-github-con-scope-repo>`
-    - `Content-Type: application/json`
+  - **Headers:** `Authorization: Bearer <PAT-con-scope-repo>` y `Content-Type: application/json`
   - **Body:**
     ```json
     {
       "event_type": "jira-ticket",
-      "client_payload": { "ticket_id": "{{issue.key}}" }
+      "client_payload": {
+        "ticket_id": "{{issue.key}}",
+        "jira_base_url": "{{baseUrl}}"
+      }
     }
     ```
 
+### 6. Activar GitHub Pages
+
+Repo > **Settings > Pages > Branch: main > Folder: /docs** > Save.
+
+La pagina demo queda en `https://<tu-usuario>.github.io/demo-jira-flow-aw/`.
+
 ## Uso
 
-### Ejecucion manual
+### Ejecucion manual (demo en vivo)
 
 ```bash
-gh aw run jira-orchestrator -f ticket_id=PROJ-1
+gh aw run jira-orchestrator -f ticket_id=SCRUM-1
 ```
 
 ### Ver logs en tiempo real
@@ -111,15 +105,35 @@ gh aw logs jira-orchestrator
 gh aw audit <run-id-or-url>
 ```
 
-## Tip: repo destino dinamico
+### Recompilar despues de cambios al workflow
 
-Para que el agente cree el codigo en un repo diferente segun el ticket, incluye en la descripcion del issue de Jira:
+```bash
+gh aw compile --approve
+git add .github/workflows/
+git commit -m "chore: recompilar workflow"
+git push
+```
+
+## Ticket de Jira para la demo
+
+El ticket debe incluir en la descripcion el campo `target_repo` para que el agente sepa donde trabajar:
 
 ```
-target_repo: <owner>/<repo>
+target_repo: <owner>/demo-jira-flow-aw
 ```
 
-El agente lo lee automaticamente. Si no esta presente, usa el repo por defecto configurado en `allowed-repos`.
+Ejemplo de ticket listo para usar:
+
+**Titulo:** Fix broken button  
+**Descripcion:**
+```
+La pagina docs/index.html tiene un boton rojo que llama a showAlert() 
+pero esa funcion no existe en docs/app.js, causando un ReferenceError.
+
+Fix: agregar showAlert() en docs/app.js con feedback visible al usuario.
+
+target_repo: <tu-usuario>/demo-jira-flow-aw
+```
 
 ## Estructura del repo
 
@@ -129,11 +143,15 @@ El agente lo lee automaticamente. Si no esta presente, usa el repo por defecto c
     jira-orchestrator.md        # Workflow principal - editar aqui
     jira-orchestrator.lock.yml  # Generado por gh aw compile - no editar
   agents/
-    Diseno.agent.md             # Rol: historias de usuario y requisitos
-    Arquitectura.agent.md       # Rol: pila tecnologica y estructura
-    Desarrollo.agent.md         # Rol: escritura de codigo
-    Calidad.agent.md            # Rol: revision y correccion
+    Diseno.agent.md
+    Arquitectura.agent.md
+    Desarrollo.agent.md
+    Calidad.agent.md
   CODEOWNERS
-CLAUDE.md                       # Referencia tecnica de sintaxis gh aw
+docs/
+  index.html                    # Pagina demo (GitHub Pages)
+  app.js                        # JS con bug para la demo
+  style.css
+CLAUDE.md                       # Referencia tecnica detallada
 README.md
 ```
