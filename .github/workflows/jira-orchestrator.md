@@ -52,6 +52,9 @@ steps:
 safe-outputs:
   create-pull-request:
     draft: true
+  assign-to-agent:
+    name: copilot
+    target: "*"
 ---
 
 # Orquestador Jira a PR
@@ -125,7 +128,9 @@ Usando el contenido en memoria (NO releas archivos), verifica:
 
 ## Paso 5 - Pull Request
 
-Crea el PR en draft. Descripcion debe incluir el ID del ticket, los cambios realizados y una nota de que requiere revision humana.
+Crea el PR en draft usando el ID temporal `aw_pr_ticket` para que pueda ser referenciado por el siguiente paso. La descripcion debe incluir el ID del ticket, los cambios realizados y una nota de que requiere revision humana.
+
+Despues de crear el PR, asigna Copilot usando `assign_to_agent` con `pull_number: "aw_pr_ticket"` (el mismo ID temporal).
 
 
 ## Reglas generales
