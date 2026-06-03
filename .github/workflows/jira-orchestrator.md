@@ -8,7 +8,9 @@ on:
         description: 'ID del ticket de Jira (ejemplo: DEMO-1)'
         required: true
 
-engine: copilot
+engine:
+  id: copilot
+  model: gpt-4o
 timeout-minutes: 15
 
 permissions:
