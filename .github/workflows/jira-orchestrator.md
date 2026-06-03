@@ -20,16 +20,11 @@ permissions:
   pull-requests: read
   issues: read
 
-checkout:
-  - repository: LauraRangel/agentic-workflows-presentation-gcd26
-    github-token: ${{ secrets.TARGET_REPO_PAT }}
-
 tools:
   cli-proxy: true
   github:
     mode: gh-proxy
     toolsets: [default]
-    github-token: ${{ secrets.TARGET_REPO_PAT }}
   bash: true
   edit:
 
@@ -56,10 +51,7 @@ steps:
 
 safe-outputs:
   create-pull-request:
-    github-token: ${{ secrets.TARGET_REPO_PAT }}
     draft: true
-    allowed-repos:
-      - LauraRangel/agentic-workflows-presentation-gcd26
   assign-to-agent:
     name: copilot
     target: "*"
@@ -116,11 +108,10 @@ Actua como el agente de arquitectura. Usando la salida del paso anterior, produc
 
 ## Paso 3 - Fase de Desarrollo
 
-Actua como el agente de desarrollo. El repo destino ya esta clonado en el workspace actual. Usando el diseno y la arquitectura:
-1. Crea una rama nueva desde el workspace actual: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
-2. Escribe el codigo fuente completo y funcional en los archivos definidos.
-3. Sigue exactamente la pila tecnologica del paso anterior.
-4. Escribe codigo completo, no fragmentos a medias.
+Actua como el agente de desarrollo. El codigo vive en la carpeta `demo/` del repo actual. Usando el diseno y la arquitectura:
+1. Crea una rama nueva: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
+2. Edita los archivos en `demo/` segun lo definido.
+3. Escribe codigo completo, no fragmentos a medias.
 
 Si el agente de calidad te devuelve el codigo con problemas, correlos uno por uno y vuelve a entregar.
 
