@@ -52,8 +52,6 @@ steps:
 safe-outputs:
   create-pull-request:
     draft: true
-  add-reviewer:
-    allowed-reviewers: [copilot]
 ---
 
 # Orquestador Jira a PR
@@ -129,7 +127,6 @@ Usando el contenido en memoria (NO releas archivos), verifica:
 
 Crea el PR en draft. Descripcion debe incluir el ID del ticket, los cambios realizados y una nota de que requiere revision humana.
 
-Luego agrega a `copilot` como reviewer del PR.
 
 ## Reglas generales
 
