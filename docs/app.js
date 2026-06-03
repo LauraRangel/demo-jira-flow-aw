@@ -3,4 +3,7 @@ function showMessage() {
   msg.classList.remove('hidden');
 }
 
-// BUG: showAlert no esta definida, el boton roto lanzara un ReferenceError
+function showAlert() {
+  const alert = document.getElementById('alert');
+  alert.classList.remove('hidden');
+}

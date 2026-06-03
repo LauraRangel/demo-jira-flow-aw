@@ -68,4 +68,15 @@ button:hover { opacity: 0.85; }
   font-size: 1rem;
 }
 
+.alert {
+  margin-top: 32px;
+  padding: 16px 24px;
+  background: #3d1f1f;
+  border: 1px solid #da3633;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #ff7b72;
+  font-weight: 600;
+}
+
 .hidden { display: none; }
