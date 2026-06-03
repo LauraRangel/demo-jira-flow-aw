@@ -20,6 +20,10 @@ permissions:
   pull-requests: read
   issues: read
 
+checkout:
+  - repository: LauraRangel/agentic-workflows-presentation-gcd26
+    github-token: ${{ secrets.TARGET_REPO_PAT }}
+
 tools:
   cli-proxy: true
   github:
@@ -104,12 +108,11 @@ Actua como el agente de arquitectura. Usando la salida del paso anterior, produc
 
 ## Paso 3 - Fase de Desarrollo
 
-Actua como el agente de desarrollo. Usando el diseno y la arquitectura:
-1. Clona el repo destino con bash: `gh repo clone <target_repo> workspace-target && cd workspace-target`
-2. Crea una rama nueva: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
-3. Escribe el codigo fuente completo y funcional en los archivos definidos.
-4. Sigue exactamente la pila tecnologica del paso anterior.
-5. Escribe codigo completo, no fragmentos a medias.
+Actua como el agente de desarrollo. El repo destino ya esta clonado en el workspace actual. Usando el diseno y la arquitectura:
+1. Crea una rama nueva desde el workspace actual: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
+2. Escribe el codigo fuente completo y funcional en los archivos definidos.
+3. Sigue exactamente la pila tecnologica del paso anterior.
+4. Escribe codigo completo, no fragmentos a medias.
 
 Si el agente de calidad te devuelve el codigo con problemas, correlos uno por uno y vuelve a entregar.
 
