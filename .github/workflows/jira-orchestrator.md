@@ -52,9 +52,6 @@ steps:
 safe-outputs:
   create-pull-request:
     draft: true
-  assign-to-agent:
-    name: copilot
-    target: "*"
 ---
 
 # Orquestador Jira a PR
@@ -86,60 +83,52 @@ Con ese ID, usa las dos herramientas del MCP en secuencia para leer el contenido
    ```
    No uses `--objectType` en esta llamada, no es un argumento valido para `getTeamworkGraphObject`.
 
-Del contenido del ticket extrae tambien el campo `target_repo` (formato `owner/repo`). Si el ticket no lo incluye, usa `LauraRangel/agentic-workflows-presentation-gcd26` como valor por defecto.
+Del contenido del ticket extrae el campo `target_repo`. Si no existe, usa `LauraRangel/demo-jira-flow-aw`.
+
+Luego lee UNA SOLA VEZ los archivos relevantes del repo (`docs/`) y guarda su contenido en memoria. No los vuelvas a leer en los pasos siguientes.
 
 Si no puedes obtener el ticket, detente y reporta el error.
 
 ## Paso 1 - Fase de Diseno
 
-Actua como el agente de diseno. Lee el ticket y produce:
-- **Objetivo del ticket:** una frase.
-- **Historias de usuario:** lista de 2 a 4 (formato: "Como [usuario] quiero [accion] para [beneficio]").
+Usando el contenido del ticket (ya lo tienes en memoria, NO lo releas), produce en maximo 10 lineas:
+- **Objetivo:** una frase.
+- **Historias de usuario:** 2 a 3 (formato: "Como X quiero Y para Z").
 - **Requisitos concretos:** lista de puntos claros.
 
-No escribas codigo todavia. No decidas tecnologias todavia.
+No leas archivos. No escribas codigo.
 
 ## Paso 2 - Fase de Arquitectura
 
-Actua como el agente de arquitectura. Usando la salida del paso anterior, produce:
-- **Pila tecnologica:** lista corta con una justificacion por eleccion. Prefiere soluciones simples y estandar.
-- **Estructura de archivos:** arbol simple de carpetas y archivos.
-- **Notas de seguridad y rendimiento:** solo si aplican, maximo 3 puntos.
+Usando la salida del Paso 1 y el contenido del repo (ya en memoria, NO releas), produce en maximo 10 lineas:
+- **Decision tecnica:** que cambiar y donde.
+- **Archivos a modificar:** lista con nombre y cambio especifico.
+
+No leas archivos. No escribas codigo.
 
 ## Paso 3 - Fase de Desarrollo
 
-Actua como el agente de desarrollo. El codigo vive en la carpeta `demo/` del repo actual. Usando el diseno y la arquitectura:
-1. Crea una rama nueva: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
-2. Edita los archivos en `docs/` segun lo definido.
-3. Escribe codigo completo, no fragmentos a medias.
+1. Crea la rama PRIMERO antes de cualquier edicion: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
+2. Edita SOLO los archivos necesarios en `docs/` segun el Paso 2. No leas archivos que ya tienes en memoria.
+3. Codigo completo, sin fragmentos.
 
-Si el agente de calidad te devuelve el codigo con problemas, correlos uno por uno y vuelve a entregar.
+Si Calidad te devuelve el codigo, correge y vuelve a entregar sin releer todo.
 
 ## Paso 4 - Fase de Calidad
 
-Actua como el agente de calidad. Usando los requisitos del ticket y el codigo escrito:
-1. Verifica que el codigo cumple con cada requisito.
-2. Revisa que no haya errores obvios, codigo incompleto o malas practicas.
-3. Verifica que sigue la arquitectura definida.
+Usando el contenido en memoria (NO releas archivos), verifica:
+1. El codigo cumple cada requisito del ticket.
+2. No hay errores obvios ni codigo incompleto.
 
-- Si encuentras problemas: lista los problemas numerados y vuelve al Paso 3. Maximo 3 iteraciones en total.
-- Si el codigo esta bien: escribe **VEREDICTO: APROBADO** y continua al Paso 5.
+- Si hay problemas: lista numerada y vuelve al Paso 3. Maximo 3 iteraciones.
+- Si esta bien: **VEREDICTO: APROBADO** y continua.
 
 ## Paso 5 - Pull Request
 
-Crea un Pull Request en draft con todo el codigo implementado.
-
-La descripcion del PR debe incluir:
-- El ID del ticket de Jira.
-- Las funcionalidades implementadas.
-- Las decisiones de arquitectura mas importantes.
-- Una nota de que el codigo fue generado por agentes y requiere revision humana.
-
-Despues de crear el PR, asigna Copilot al PR recien creado para que pueda continuar con la revision y mejoras.
+Crea el PR en draft. Descripcion debe incluir el ID del ticket, los cambios realizados y una nota de que requiere revision humana.
 
 ## Reglas generales
 
-- Trabaja paso a paso, en orden.
-- Mantén un registro corto de lo que hace cada fase.
-- No saltes pasos.
-- Si algo falla en un paso, detente y reporta que ocurrio.
+- NO releas archivos que ya leiste en el Paso 0.
+- Trabaja paso a paso, sin saltarte pasos.
+- Si algo falla, detente y reporta.
