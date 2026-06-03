@@ -110,7 +110,7 @@ Actua como el agente de arquitectura. Usando la salida del paso anterior, produc
 
 Actua como el agente de desarrollo. El codigo vive en la carpeta `demo/` del repo actual. Usando el diseno y la arquitectura:
 1. Crea una rama nueva: `git checkout -b feature/ticket-${{ github.event.inputs.ticket_id }}-${{ github.run_id }}`
-2. Edita los archivos en `demo/` segun lo definido.
+2. Edita los archivos en `docs/` segun lo definido.
 3. Escribe codigo completo, no fragmentos a medias.
 
 Si el agente de calidad te devuelve el codigo con problemas, correlos uno por uno y vuelve a entregar.
