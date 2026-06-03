@@ -84,7 +84,15 @@ Con ese ID, usa las dos herramientas del MCP en secuencia para leer el contenido
    - `objectType`: `JiraWorkItem`
    - `objectIdentifier`: el ID del ticket (ej. `SCRUM-5`)
 
-2. Llama a `getTeamworkGraphObject` con los ARIs devueltos en el paso anterior para obtener el contenido completo: titulo, descripcion, criterios de aceptacion y cualquier campo relevante.
+2. Llama a `getTeamworkGraphObject` con estos dos argumentos exactos (los ARIs vienen del paso anterior):
+   - `cloudId`: `${{ env.JIRA_BASE_URL }}`
+   - `objects`: un array JSON con los ARIs, por ejemplo: `'["ari:cloud:jira:UUID:issue/ID"]'`
+   
+   Ejemplo de llamada correcta:
+   ```
+   jira getTeamworkGraphObject --cloudId https://lauraisa43.atlassian.net --objects '["ari:cloud:jira:4b99d454-...:issue/10036"]'
+   ```
+   No uses `--objectType` en esta llamada, no es un argumento valido para `getTeamworkGraphObject`.
 
 Del contenido del ticket extrae tambien el campo `target_repo` (formato `owner/repo`). Si el ticket no lo incluye, usa `LauraRangel/agentic-workflows-presentation-gcd26` como valor por defecto.
 
