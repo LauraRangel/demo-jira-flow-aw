@@ -9,7 +9,7 @@ on:
         required: true
 engine:
   id: copilot
-  model: gpt-4o
+  model: gpt-4o-mini
 timeout-minutes: 15
 
 env:
