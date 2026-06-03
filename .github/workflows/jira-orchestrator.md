@@ -47,6 +47,10 @@ steps:
         exit 1
       fi
       cp "$GITHUB_EVENT_PATH" /tmp/gh-aw/event.json
+  - id: atlassian
+    env:
+      ATLASSIAN_SITE_NAME: ${{ secrets.ATLASSIAN_SITE_NAME }}
+    run: echo "site=$ATLASSIAN_SITE_NAME" >> $GITHUB_OUTPUT
 
 safe-outputs:
   create-pull-request:
@@ -72,7 +76,12 @@ cat /tmp/gh-aw/event.json | jq -r '.client_payload["ticket_id"] // .inputs.ticke
 ```
 
 Con ese ID, usa las dos herramientas del MCP en secuencia para leer el contenido completo:
-1. Llama a `getTeamworkGraphContext` con el ID del ticket (por ejemplo `DEMO-1` o la URL completa del issue). Esto devuelve el contexto y los ARIs de los objetos relacionados.
+
+1. Llama a `getTeamworkGraphContext` con estos tres argumentos exactos:
+   - `cloudId`: `https://${{ steps.atlassian.outputs.site }}.atlassian.net`
+   - `objectType`: `JiraWorkItem`
+   - `objectIdentifier`: el ID del ticket (ej. `SCRUM-5`)
+
 2. Llama a `getTeamworkGraphObject` con los ARIs devueltos en el paso anterior para obtener el contenido completo: titulo, descripcion, criterios de aceptacion y cualquier campo relevante.
 
 Del contenido del ticket extrae tambien el campo `target_repo` (formato `owner/repo`). Si el ticket no lo incluye, usa `LauraRangel/agentic-workflows-presentation-gcd26` como valor por defecto.

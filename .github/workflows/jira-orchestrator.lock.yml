@@ -1,5 +1,5 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"0adcf8284ce001b5697c9145725fc0aa1c451ade5e4af2d82b725d16f2e25670","body_hash":"dae137319db18dc0b7089085d1962d7c9feb1eed4c7d16c2ed492df0a9cf446f","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"gpt-4o"}
-# gh-aw-manifest: {"version":1,"secrets":["ATLASSIAN_BASIC_AUTH","COPILOT_GITHUB_TOKEN","GH_AW_AGENT_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","TARGET_REPO_PAT"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"3ea13c02d765410340d533515cb31a7eef2baaf0","version":"v0.77.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.58"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.22"},{"image":"ghcr.io/github/github-mcp-server:v1.1.0"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"20a011fa9cf2dd1414fbb1a49925b900e410e1cc79c3d7390e19f016c87d6017","body_hash":"aeb3b0a129f0a3581979e7ea1b783734efc23de70a2f3b8fdc31cf5ef67d847c","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"gpt-4o"}
+# gh-aw-manifest: {"version":1,"secrets":["ATLASSIAN_BASIC_AUTH","ATLASSIAN_SITE_NAME","COPILOT_GITHUB_TOKEN","GH_AW_AGENT_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","TARGET_REPO_PAT"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"3ea13c02d765410340d533515cb31a7eef2baaf0","version":"v0.77.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.58"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.22"},{"image":"ghcr.io/github/github-mcp-server:v1.1.0"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
 #  | |_| | __ _  ___ _ __ | |_ _  ___ 
@@ -25,6 +25,7 @@
 #
 # Secrets used:
 #   - ATLASSIAN_BASIC_AUTH
+#   - ATLASSIAN_SITE_NAME
 #   - COPILOT_GITHUB_TOKEN
 #   - GH_AW_AGENT_TOKEN
 #   - GH_AW_CI_TRIGGER_TOKEN
@@ -196,27 +197,28 @@ jobs:
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
+          GH_AW_STEPS_ATLASSIAN_OUTPUTS_SITE: ${{ steps.atlassian.outputs.site }}
         # poutine:ignore untrusted_checkout_exec
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_d3693013362186d7_EOF'
+          cat << 'GH_AW_PROMPT_7f2f6b0e1618e73b_EOF'
           <system>
-          GH_AW_PROMPT_d3693013362186d7_EOF
+          GH_AW_PROMPT_7f2f6b0e1618e73b_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_d3693013362186d7_EOF'
+          cat << 'GH_AW_PROMPT_7f2f6b0e1618e73b_EOF'
           <safe-output-tools>
           Tools: create_pull_request, assign_to_agent, missing_tool, missing_data, noop
-          GH_AW_PROMPT_d3693013362186d7_EOF
+          GH_AW_PROMPT_7f2f6b0e1618e73b_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_create_pull_request.md"
-          cat << 'GH_AW_PROMPT_d3693013362186d7_EOF'
+          cat << 'GH_AW_PROMPT_7f2f6b0e1618e73b_EOF'
           </safe-output-tools>
-          GH_AW_PROMPT_d3693013362186d7_EOF
+          GH_AW_PROMPT_7f2f6b0e1618e73b_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
-          cat << 'GH_AW_PROMPT_d3693013362186d7_EOF'
+          cat << 'GH_AW_PROMPT_7f2f6b0e1618e73b_EOF'
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if github.actor}}
@@ -245,12 +247,12 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_d3693013362186d7_EOF
+          GH_AW_PROMPT_7f2f6b0e1618e73b_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/cli_proxy_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_d3693013362186d7_EOF'
+          cat << 'GH_AW_PROMPT_7f2f6b0e1618e73b_EOF'
           </system>
           {{#runtime-import .github/workflows/jira-orchestrator.md}}
-          GH_AW_PROMPT_d3693013362186d7_EOF
+          GH_AW_PROMPT_7f2f6b0e1618e73b_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -259,6 +261,7 @@ jobs:
           GH_AW_ENGINE_ID: "copilot"
           GH_AW_GITHUB_EVENT_INPUTS_TICKET_ID: ${{ github.event.inputs.ticket_id }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
+          GH_AW_STEPS_ATLASSIAN_OUTPUTS_SITE: ${{ steps.atlassian.outputs.site }}
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -280,6 +283,7 @@ jobs:
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
           GH_AW_MCP_CLI_SERVERS_LIST: "- `jira` — run `jira --help` to see available tools\n- `safeoutputs` — run `safeoutputs --help` to see available tools"
           GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: ${{ needs.pre_activation.outputs.activated }}
+          GH_AW_STEPS_ATLASSIAN_OUTPUTS_SITE: ${{ steps.atlassian.outputs.site }}
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -301,7 +305,8 @@ jobs:
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
                 GH_AW_MCP_CLI_SERVERS_LIST: process.env.GH_AW_MCP_CLI_SERVERS_LIST,
-                GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED
+                GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED,
+                GH_AW_STEPS_ATLASSIAN_OUTPUTS_SITE: process.env.GH_AW_STEPS_ATLASSIAN_OUTPUTS_SITE
               }
             });
       - name: Validate prompt placeholders
@@ -399,12 +404,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Copy event payload to sandbox-accessible location
-        run: |-
+        run: |
           if [ ! -f "$GITHUB_EVENT_PATH" ]; then
             echo "::error::Event file not found at $GITHUB_EVENT_PATH"
             exit 1
           fi
           cp "$GITHUB_EVENT_PATH" /tmp/gh-aw/event.json
+      - env:
+          ATLASSIAN_SITE_NAME: ${{ secrets.ATLASSIAN_SITE_NAME }}
+        id: atlassian
+        run: echo "site=$ATLASSIAN_SITE_NAME" >> $GITHUB_OUTPUT
 
       - name: Configure Git credentials
         env:
@@ -478,9 +487,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << GH_AW_SAFE_OUTPUTS_CONFIG_d9b4ba52510e2eb3_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << GH_AW_SAFE_OUTPUTS_CONFIG_b568dd136983b0b6_EOF
           {"assign_to_agent":{"max":1,"name":"copilot","target":"*"},"create_pull_request":{"allowed_repos":["LauraRangel/agentic-workflows-presentation-gcd26"],"draft":true,"github-token":"${TARGET_REPO_PAT}","max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"request_review"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_d9b4ba52510e2eb3_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_b568dd136983b0b6_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -724,7 +733,7 @@ jobs:
           
           mkdir -p /home/runner/.copilot
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_fc1720fd3e3e1166_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_923d37aa15f112f5_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "jira": {
@@ -769,7 +778,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_fc1720fd3e3e1166_EOF
+          GH_AW_MCP_CONFIG_923d37aa15f112f5_EOF
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -903,8 +912,9 @@ jobs:
             const { main } = require('${{ runner.temp }}/gh-aw/actions/redact_secrets.cjs');
             await main();
         env:
-          GH_AW_SECRET_NAMES: 'ATLASSIAN_BASIC_AUTH,COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,TARGET_REPO_PAT'
+          GH_AW_SECRET_NAMES: 'ATLASSIAN_BASIC_AUTH,ATLASSIAN_SITE_NAME,COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,TARGET_REPO_PAT'
           SECRET_ATLASSIAN_BASIC_AUTH: ${{ secrets.ATLASSIAN_BASIC_AUTH }}
+          SECRET_ATLASSIAN_SITE_NAME: ${{ secrets.ATLASSIAN_SITE_NAME }}
           SECRET_COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           SECRET_GH_AW_GITHUB_MCP_SERVER_TOKEN: ${{ secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN }}
           SECRET_GH_AW_GITHUB_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}
