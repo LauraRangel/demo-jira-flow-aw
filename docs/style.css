@@ -69,3 +69,10 @@ button:hover { opacity: 0.85; }
 }
 
 .hidden { display: none; }
+
+#counter {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #8b949e;
+}
