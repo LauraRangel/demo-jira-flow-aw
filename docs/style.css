@@ -59,6 +59,11 @@ button:hover { opacity: 0.85; }
   color: #fff;
 }
 
+#btn-share {
+  background: #1f6feb;
+  color: #fff;
+}
+
 .message {
   margin-top: 32px;
   padding: 16px 24px;
